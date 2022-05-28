@@ -6,7 +6,7 @@ Flow parameters:
  1) wall boundary (0: none, 1: pipe flow)   =   1.0		(1.0)
  2) obstacle (0: none, 1: bar, 2: circle)   =	1.0		(1.0)
  3) new run (0) or continue (2)		    =   0.0		(0.0)
- 4) Reynolds number 	    	    	    =  40000.		(100)
+ 4) Reynolds number 	    	    	    =  60000.		(100)
 
 Initial conditions:
  5) i.c. (0: pipe, 1: duo; 2: turb, 3:KH)   =	0.		(0.0)
@@ -20,7 +20,7 @@ Grid scale:
 11) ny (grid points in y)	 	    =   512.		(256.)
 
 Time scale:
-12) dt time step (CF limited)		    =   0.0000005		(0.0005)
+12) dt time step (CF limited)		    =   0.000001		(0.0005)
 13) itstp (steps between output)	    =   500.		(2000)
 14) itmax (total steps)			    =   50000000.		(100000)
 15)                                   	    = 	0.		(0.)
@@ -28,7 +28,7 @@ Time scale:
 Computational parameters:
 16) Poisson equation solver (0:FFT, 1:SOR)  =   0.		(0.)
 17) advection solver (0: upwd; 2: Arakawa)  = 	0.		(0.)
-18) hyperviscosity   	   	     	    =   0.000005	(0.000001)
+18) hyperviscosity   	   	     	    =   0.0000001	(0.000001)
 19) OpenMP: number of parallel threads	    =	12.		(8.0)
 
 @ --------------------------------------
