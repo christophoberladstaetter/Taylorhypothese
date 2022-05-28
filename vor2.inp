@@ -16,12 +16,12 @@ Initial conditions:
 
 Grid scale:
  9) Lx (scale length of domain)		    =   1.0		(1.)
-10) nx (grid points in x)	 	    =   128.		(64.)
-11) ny (grid points in y)	 	    =   128.		(256.)
+10) nx (grid points in x)	 	    =   512.		(64.)
+11) ny (grid points in y)	 	    =   512.		(256.)
 
 Time scale:
-12) dt time step (CF limited)		    =   0.000008		(0.0005)
-13) itstp (steps between output)	    =   2000.		(2000)
+12) dt time step (CF limited)		    =   0.00008		(0.0005)
+13) itstp (steps between output)	    =   250.		(2000)
 14) itmax (total steps)			    =   50000000.		(100000)
 15)                                   	    = 	0.		(0.)
 
