@@ -28,7 +28,7 @@ Time scale:
 Computational parameters:
 16) Poisson equation solver (0:FFT, 1:SOR)  =   0.		(0.)
 17) advection solver (0: upwd; 2: Arakawa)  = 	0.		(0.)
-18) hyperviscosity   	   	     	    =   0.0000005	(0.000001)
+18) hyperviscosity   	   	     	    =   0.000005	(0.000001)
 19) OpenMP: number of parallel threads	    =	12.		(8.0)
 
 @ --------------------------------------
