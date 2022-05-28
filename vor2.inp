@@ -20,7 +20,7 @@ Grid scale:
 11) ny (grid points in y)	 	    =   512.		(256.)
 
 Time scale:
-12) dt time step (CF limited)		    =   0.000004		(0.0005)
+12) dt time step (CF limited)		    =   0.000001		(0.0005)
 13) itstp (steps between output)	    =   250.		(2000)
 14) itmax (total steps)			    =   50000000.		(100000)
 15)                                   	    = 	0.		(0.)
