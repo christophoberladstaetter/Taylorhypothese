@@ -1,0 +1,157 @@
+===============================================================================
+                                     VOR2
+===============================================================================
+ 
+2D incompressible Navier-Stokes code in vorticity-streamfunction formulation
+with penalized Brinkman obstacle boundary conditions (for pipe flow)
+or periodic boundary conditions (for vortex merger; decaying turbulence; etc.).
+
+ ( (c) Alexander Kendl, Innsbruck; vor2 version V0.1 of 06.04.2021 )
+
+Disclaimer:
+The code is still in "beta" phase and not yet properly tested or verified!
+Please apply with due caution. Bug reports and code improvements are welcome!
+The main intended use for this code is to provide simple numerical examples
+for some phenomena discussed in the course "Many body theory: fluid dynamics".
+
+References for some numerical schemes are provided in the comments in the code.
+
+Dependencies:
+Needs some C/C++ libraries (e.g. fftw3, omp) available in every Linux distribution
+(tested with OpenSUSE Leap 15.2).
+
+For command line execution under Linux first apply these settings:
+  'ulimit -s unlimited'
+  'export OMP_STACKSIZE=2G'
+
+Compilation with attached makefile:
+  'make vor2'
+
+Execution with run time control output:
+  'time ./vor2'
+
+Parallelisation with OpenMP is here not extremely efficient, but good speed-up up to np=8.
+Run time depends on problem size: a few minutes for 64^2, many hours for 1024^2.
+
+(Explicit) time step and hyperviscosity have to be refined with the grid resolution.
+(Set 'dt' and 'dyhv' by trial and error: dt as large as possible and dyhv as
+small as possible without crashing the run through numerical instability...)
+
+Time step (and typical time scales) also sensitive to choice of Reynolds number.
+(Here: Re == 0 sets zero viscosity; but might need some hyperviscosity for stability.)
+
+For Brinkman penalization of obstacle grid nodes:
+the product of penalisation and time step, dt*pen < 1, has to be smaller than 1.
+
+
+Be aware that not all combinations of input parameters are useful and may crash the code...
+Some working 'vor2.inp' input files vor pipe flow, dual vortex interaction,
+decaying turbulence, and Kelvin-Helmholtz instability, are provided in the repository.
+(example: 'cp vor2.inp.merger vor2.inp')
+
+The Arakawa and centered difference schemes may develop Gibbs oscillations:
+these can be reduced by increasing grid resolution and/or hyperviscosity.
+
+
+Running in a RAM disc folder (here: at location '/ramdisc/') saves some output time
+(and hard disc wear and tear...):
+  'mkdir /ramdisc', 'sudo mount -t tmpfs none /ramdisc -o size=2048m'.
+ 
+Visualisation of 1D graphs with any plotting programme (e.g. xmgrace),
+visualisation of 2D contour plots with attached gnuplot script file "gpl-ctr.plt".
+Watch the simulation live by uncommenting "reread"! In gnuplot: "load 'gpl-ctr.plt'".
+
+
+Makefile example (here: using fftw3 with OpenMP parallelisation):
+
+exec = vor2
+objs = vor2.o 
+LFLAGS = -mcmodel=large -march=native -lm -O2 -fopenmp -lfftw3_omp -lfftw3 
+CFLAGS = -I.
+LIBS = /usr/lib64 
+all: $(exec)
+$(exec): $(objs)
+g++  $(exec).C -o $@  $(LFLAGS) -L$(LIBS)
+rm *.o
+vor2.o: vor2.C 
+ 	g++  -c $< -o $@
+
+How to set up everything in visual studio code- virtual environments 
+https://code.visualstudio.com/docs/python/python-tutorial
+https://scipy.org/install/ --> for getting the scipi kit
+https://towardsdatascience.com/plotting-live-data-with-matplotlib-d871fac7500b--> creating live plots
+
+In general the hyperviscosity has an huuuuge impact to the building of turbulences
+
+
+
+
+Hi,
+
+ 
+
+den TR2 findest du im Netzwerk unter dem Namen: pc51-c744
+
+ 
+
+Dein username: christoph
+
+Pw: ripandtear
+
+ 
+
+Bei Fragen einfach melden.
+
+ 
+
+LG
+
+ 
+
+FF
+// Zuerst VPN verbinden
+
+
+// Eine SSH Verbindung aufbauen
+ssh christoph@pc51-c744.uibk.ac.at
+Dein username: christoph
+Pw: ripandtear
+
+
+// configure git
+git config --global user.name Christoph.Oberladstaetter@student.uibk.ac.at
+
+// how to get the git data
+https://github.com/settings/tokens/877620247
+git clone https://github.com/christophoberladstaetter/vor2_files.git
+Christoph.Oberladstaetter@student.uibk.ac.at
+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
+
+// Stashing --> verbergen
+git stash
+git pull
+
+// commit data from the remote PC to your git https://www.datacamp.com/tutorial/git-push-pull
+git add .
+git commit -m 'this is fun'
+git remote add origin 'your_url_name'
+git push -u origin master
+
+// access via ssh-x
+sudo apt-get install vim-gtk
+ssh -X <user>@<Xclient>
+
+
+// tmux tipps and hints
+
+https://linuxize.com/post/getting-started-with-tmux/
+
+// Secure copy from the workstation to the local station
+// make sure to be at stoffl1709 when entering that 
+scp -r christoph@pc51-c744:~/vor2_files ~/Desktop/BA_code
+
+// background and foreground stuff
+https://linuxhandbook.com/run-process-background/
+
+Beste Grüße,
+....................................................................................

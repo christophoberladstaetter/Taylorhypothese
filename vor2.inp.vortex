@@ -1,0 +1,34 @@
+--------------------------------------------------------------------------
+Input file for 2d Navier-Stokes vorticity code VOR2
+--------------------------------------------------------------------------
+
+Flow parameters: 
+ 1) wall boundary (0: none, 1: pipe flow)   =   0.0		(1.0)
+ 2) obstacle (0: none, 1: bar, 2: circle)   =	0.0		(1.0)
+ 3) new run (0) or restart (2) 		    =   0.0		(0.0)
+ 4) Reynolds number 	    	    	    =   50.		(100)
+
+Initial conditions:
+ 5) i.c. (0: pipe, 1: duo; 2: turb, 3:KH)   =	4.		(0.0)
+ 6) obstacle width to channel width    	    =	0.05		(0.1)
+ 7) amp (flow amplitude)		    =   10000.0		(1.0)
+ 8) obstacle penalty (op*dt<1)      	    = 	1000. 		(1000.)
+
+Grid scale:
+ 9) Lx (scale length of domain)		    =   1.0		(1.)
+10) nx (grid points in x)	 	    =   256.		(64.)
+11) ny (grid points in y)	 	    =   256.		(256.)
+
+Time scale:
+12) dt time step (CF limited)		    =   0.00001		(0.0005)
+13) itstp (steps between output)	    =   100.		(2000)
+14) itmax (total steps)			    =   100000.		(100000)
+15)                                   	    = 	0.		(0.)
+
+Computational parameters:
+16) Poisson equation solver (0:FFT, 1:SOR)  =   0.		(0.)
+17) advection solver (0: upwd; 2: Arakawa)  = 	1.		(0.)
+18) hyperviscosity   	   	     	    =   0.00000001	(0.00001)
+19) OpenMP: number of parallel threads	    =	8.		(8.0)
+
+@ --------------------------------------
