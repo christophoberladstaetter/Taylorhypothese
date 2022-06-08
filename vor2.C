@@ -240,7 +240,17 @@ int main(void)
           if (sigma == 1.)
           {
             obs[i][j] = 0.;
-            if ( ((i-nx0) > 0.00*(nx1-nx0)) && ((i-nx0) < 0.30*(nx1-nx0)) && (fabs(yi)<=2.))
+            if ( ((i-nx0) > 0.00*(nx1-nx0)) && ((i-nx0) < 0.10*(nx1-nx0)) && (fabs(yi)<=2.))
+              obs[i][j] = 1.;
+            if ( ((i-nx0) > 0.12*(nx1-nx0)) && ((i-nx0) < 0.14*(nx1-nx0)) && (fabs(yi)<=2.))
+              obs[i][j] = 1.;
+            if ( ((i-nx0) > 0.16*(nx1-nx0)) && ((i-nx0) < 0.18*(nx1-nx0)) && (fabs(yi)<=2.))
+              obs[i][j] = 1.;
+            if ( ((i-nx0) > 0.20*(nx1-nx0)) && ((i-nx0) < 0.22*(nx1-nx0)) && (fabs(yi)<=2.))
+              obs[i][j] = 1.;
+            if ( ((i-nx0) > 0.24*(nx1-nx0)) && ((i-nx0) < 0.26*(nx1-nx0)) && (fabs(yi)<=2.))
+              obs[i][j] = 1.;
+            if ( ((i-nx0) > 0.28*(nx1-nx0)) && ((i-nx0) < 0.30*(nx1-nx0)) && (fabs(yi)<=2.))
               obs[i][j] = 1.;
             if ( ((i-nx0) > 0.32*(nx1-nx0)) && ((i-nx0) < 0.34*(nx1-nx0)) && (fabs(yi)<=2.))
               obs[i][j] = 1.;
@@ -262,18 +272,20 @@ int main(void)
               obs[i][j] = 1.;
             if ( ((i-nx0) > 0.68*(nx1-nx0)) && ((i-nx0) < 0.70*(nx1-nx0)) && (fabs(yi)<=2.))
              obs[i][j] = 1.;
-            if ( ((i-nx0) > 0.72*(nx1-nx0)) && ((i-nx0) < 1.0*(nx1-nx0)) && (fabs(yi)<=2.))
+            if ( ((i-nx0) > 0.72*(nx1-nx0)) && ((i-nx0) < 0.74*(nx1-nx0)) && (fabs(yi)<=2.))
+             obs[i][j] = 1.;
+            if ( ((i-nx0) > 0.76*(nx1-nx0)) && ((i-nx0) < 0.78*(nx1-nx0)) && (fabs(yi)<=2.))
+             obs[i][j] = 1.;
+            if ( ((i-nx0) > 0.80*(nx1-nx0)) && ((i-nx0) < 0.82*(nx1-nx0)) && (fabs(yi)<=2.))
+             obs[i][j] = 1.;
+            if ( ((i-nx0) > 0.84*(nx1-nx0)) && ((i-nx0) < 0.86*(nx1-nx0)) && (fabs(yi)<=2.))
+             obs[i][j] = 1.;
+            if ( ((i-nx0) > 0.88*(nx1-nx0)) && ((i-nx0) < 0.90*(nx1-nx0)) && (fabs(yi)<=2.))
+             obs[i][j] = 1.;
+            
+            if ( ((i-nx0) > 0.92*(nx1-nx0)) && ((i-nx0) < 1.0*(nx1-nx0)) && (fabs(yi)<=2.))
               obs[i][j] = 1.;
 
-
-   
-            
-         
-
-
-            
-           
-           
         
           }
         }
@@ -287,7 +299,7 @@ int main(void)
     }
 
     // Print obstacle to file
-    g7 = fopen("simdata5/obstacle.dat", "w");
+    g7 = fopen("simdata1/obstacle.dat", "w");
     for (i=nx0; i<=nx1; ++i){
       for (j=0; j<=ny1; ++j){
         obs_core[i][j] = obs[i][j];
@@ -411,7 +423,7 @@ int main(void)
   // dt (time step)
   // itmax (total steps)
   for (it = itn / itstp; it < itend; ++it) // total time loop (output step)
-  {
+  { 
     for (is = 0; is < itstp; ++is) // inner time loop (without outputs)
     {
       ttt = t00 + (it + 0) * ddtt + (is + 1) * dt;
@@ -616,8 +628,11 @@ int main(void)
 
     // low-time resolution diagnostics: energies and snapshot outputs
     // (output to file is slow, so only done in every n-th time step)
-    counter=counter+1; // this is my counter for my outputfiles
-    diagnose(ttt, t00, it, itmax, phi, www, www, counter, reynold, dhyv, dt, itstp);
+    // this is my counter for my outputfiles
+
+    if(ttt>1)
+      { counter=counter+1; 
+        diagnose(ttt, t00, it, itmax, phi, www, www, counter, reynold, dhyv, dt, itstp);}
 
   } // ... end outer time loop ..........................................
 
@@ -839,7 +854,7 @@ void diagnose(double ttt, double t00, int it, int itmax,
   }
 
 
-  grid = fopen("simdata5/info.dat", "w"); // open the grid data file
+  grid = fopen("simdata1/info.dat", "w"); // open the grid data file
   fprintf(grid, "%d  %d  %d  %.6e  %.6e  %.6e  %.15e \n", nx/2, ny, counter, reynold, hypervisc,dt,itstp); // bcs if it is pipe flow the grid in x is automatically used by double the value of the inp paramter
   fclose(grid);
   #ifdef _OPENMP
@@ -913,9 +928,10 @@ void diagnose(double ttt, double t00, int it, int itmax,
 
   // x profile (y averages):
   g = fopen("profx.dat", "w");
-  snprintf(filename_e_mat,sizeof(char) * 150,"simdata5/e_mat%i.dat",counter);
+  snprintf(filename_e_mat,sizeof(char) * 150,"simdata1/e_mat%i.dat",counter);
   ene = fopen(filename_e_mat, "w"); // open the energy file
   double xp_vy;
+ 
   // for (i=0; i<=nx1; i++)
   for (i = nx0; i <= nx1; i++)
   // for (i=nxh; i<=nx1; i++)
@@ -963,8 +979,8 @@ void diagnose(double ttt, double t00, int it, int itmax,
   fclose(g);
 
   // 2D (x,y) plots of vorticity, potential
-  snprintf(filename_w2d,sizeof(char) * 32,"simdata5/w2d%i.dat",counter);
-  snprintf(filename_v2d,sizeof(char) * 32,"simdata5/v2d%i.dat",counter);
+  snprintf(filename_w2d,sizeof(char) * 32,"simdata1/w2d%i.dat",counter);
+  snprintf(filename_v2d,sizeof(char) * 32,"simdata1/v2d%i.dat",counter);
   g1 = fopen(filename_w2d, "w");
   g2 = fopen("p2d0.dat", "w");
   g3 = fopen(filename_v2d, "w");
