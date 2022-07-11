@@ -1,0 +1,111 @@
+#!/bin/python3
+import matplotlib.pyplot as plt
+import numpy as np
+from glob import glob
+import os
+from tqdm import tqdm
+from moviepy.editor import *
+
+def print_help():
+    print('please provide the following command line arguments: n, obs')
+    print('n:')
+    print('    number of the run you want to analyze')
+    print('obs: (optional)')
+    print('    vorticity:       1 (default)')
+    print('    velocity:        2')
+    print('    streamfunction:  3')
+    exit()
+
+if ((len(sys.argv) == 1) or ('-h' in sys.argv[1])): print_help()
+
+name = f'run__{int(sys.argv[1]):03d}'
+
+path_data = 'runs/' + name +'/'
+
+inp_file = open(path_data+'vor2.inp', 'r')
+
+inp_params = ['']   # trough initial element indicees 
+                    # mach the numbers in the input file
+for line in inp_file.readlines():
+    if '=' in line:
+        inp_params.append(float(line.split('=')[1].split()[0]))
+
+# get relevant params
+nx = int(inp_params[10])
+ny = int(inp_params[11])
+
+obs = np.loadtxt(path_data+"obstacle.dat", delimiter = '  ').T[2]
+obs = obs.reshape((nx,ny))
+
+files = 'w2d'
+cmap = 'seismic'
+
+if len(sys.argv) == 3:
+    if sys.argv[2] == '2': 
+        files = 'v2d'
+        cmap = 'reds'
+    if sys.argv[2] == '3': 
+        files = 'p2d'
+        cmap = 'reds'
+
+def time(file: str):
+    time = float(file.split('/')[-1].split('_')[1].split('.dat')[0])
+    return time
+
+path_frames = 'plots/' + path_data.split('/')[-2] + '/'
+
+try:
+    os.mkdir('plots/') 
+except FileExistsError: pass
+
+try:
+    os.mkdir(path_frames)
+except FileExistsError:
+    print('Caution, the plots directory already exists')
+    print('please move the \"' + path_frames +'\"directory')
+    exit()
+
+files = glob(path_data+files+'*.dat')
+times = [time(file) for file in files]
+times.sort()
+files.sort(key = time)
+
+# fig, ax1 = plt.subplots(1, 1, figsize = (10,2.5))
+# data = np.loadtxt(files[0], delimiter = '  ').T[2]
+# data = data.reshape((nx, ny))
+
+# map = ax1.imshow(data, cmap = cmap, clim = (-50,50))
+# ax2 = plt.colorbar(map)
+print('exporting frames to', path_frames)
+iterable = list(zip(times[1:], files[1:]))
+for t, f in tqdm(iterable, desc = 'exporting frames'):
+    data = np.loadtxt(f, delimiter = '  ').T[2]
+    data = data.reshape((nx, ny))
+
+    fig, ax1 = plt.subplots(1, 1, figsize = (10,2.5))
+    map = ax1.imshow(data, cmap = cmap, vmin = -50, vmax = 50)
+    ax1.contour(obs, [0])
+    plt.title(f't = {t:05.2f}')
+    plt.colorbar(map)
+    plt.xticks([])
+    plt.yticks([])
+    plt.savefig(path_frames+f"frame_{t}.png")
+    plt.close(fig)
+
+print('\n\nDone exporting frames!')
+print('starting to create video...\n')
+
+try: os.mkdir('animations/')
+except FileExistsError: pass
+
+def time(file: str):
+    time = float(file.split('/')[-1].split('_')[1].split('.png')[0])
+    return time
+
+files = glob(path_frames+'frame_*.png')
+files.sort(key = time)
+
+clip = ImageSequenceClip(files, fps = 12)
+clip.write_videofile('animations/' + name + '.mp4', fps = 12)
+
+os.rmdir(path_frames)

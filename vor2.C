@@ -1367,118 +1367,115 @@ void laplace(double (*fo)[nymax], double (*fi)[nymax], int ib, int io)
 }
 
 // ---------------------------------------------------------------------------
+// Bugfix-Update für SOR Funktion in vor2.C
+
+// ---------------------------------------------------------------------------
 // 2nd order SOR iterative 2D Poisson equation solver
 // equation: " laplace(uuu) = qqq " : gets uuu  for given qqq
-void sor2p(double (*qqq)[nymax], double (*uuu)[nymax])
+void sor2p ( double (*qqq)[nymax], double (*uuu)[nymax])
 {
-  int i, j, k, im, ip, jm, jp, i0, i1, j0, j1, iter, nit, idx, ibb, lll, dum, i0p, i1m;
-  double dx, dy, dxy, dxy2;
-  double resid, rel, rel2, pemit, epsmax, om_sor, fcheck, epssum, fnorm = 0.;
+  int i,j,k,im,ip,jm,jp,i0,i1,j0,j1,nit,idx,ibb,lll,dum,i0p,i1m,iter;
+  double dx,dy, dxy, dxy2;
+  double resid, rel, rel2, pemit, epsmax, om_sor, fnorm=0., epssum, fcheck;
   double uu1p[nx][ny], fffp[nx][ny];
 
-  i0 = 0;
-  i1 = nx1;
-  j0 = 0;
-  j1 = ny1;
+  i0 = 0; i1 = nx1;
+  j0 = 0; j1 = ny1;
 
-  nit = 500;      // max. number of iterations
-  epsmax = 0.001; // max. allowed error
-
+  nit = 250; // max. number of iterations
+  epsmax = 0.0001; // max. allowed error
+ 
   ibb = 0;
-  i0p = i0 + ibb;
-  i1m = i1 - ibb;
+  i0p = i0 + ibb; i1m = i1 - ibb;
 
-  idx = i1 - i0;
-  rel = (cos(2. * M_PI / double(idx)) + cos(1. * M_PI / double(ny))) / 2.; // mix b.c.
-  // rel = ( cos(2.*M_PI/double(idx)) + cos(2.*M_PI/double(ny)) ) / 2.; // per.
-  rel2 = .25 * rel * rel;
-
+  idx = i1-i0;
+  rel = ( cos(2.*M_PI/double(idx)) + cos(1.*M_PI/double(ny)) ) / 2.; // mix b.c.
+  if (incon!=0) rel = ( cos(2.*M_PI/double(idx)) + cos(2.*M_PI/double(ny)) ) / 2.; // per. 
+  rel2 = .25*rel*rel;
+ 
   // preparation of coefficients
-#ifdef _OPENMP
-#pragma omp parallel for private(im, ip, j, jm, jp)
-#endif
-  for (i = i0; i <= i1; ++i)
-  {
-    im = (i == i0) ? imbc : i - 1;
-    ip = (i == i1) ? ipbc : i + 1;
-    for (j = j0; j <= j1; ++j)
+#pragma omp parallel for private(im,ip,j,jm,jp) reduction(+:fnorm)
+  for (i=i0;i<=i1;++i)
     {
-      jm = (j == j0) ? jmbc : j - 1;
-      jp = (j == j1) ? jpbc : j + 1;
-
-      uu1p[i][j] = 0.; // initial value for iteration
-      if (isorcnt > 0)
-        uu1p[i][j] = uuu[i][j];
-      if (isorcnt > 1)
-        uu1p[i][j] += (uuu[i][j] - uu0[i][j]);
-
-      fffp[i][j] = qqq[i][j];
-      // 2nd order 5pt correction to r.h.s.
-      // -> 4th order discretization of Laplacian (else only 2nd order)
-      fffp[i][j] += (qqq[im][j] + qqq[ip][j] + qqq[i][jm] + qqq[i][jp] - 4. * qqq[i][j]) * (1. / 12.);
-      fnorm += fabs(fffp[i][j]);
-      fffp[i][j] *= 1. / hy2;
-    }
-  }
-#ifdef _OPENMP
-#pragma omp barrier
-#endif
-
-  isorcnt++;
-  fcheck = epsmax * fnorm;
-  om_sor = 1.;
-
-  // begin iteration
-  for (iter = 1; iter <= nit; ++iter)
-  {
-    epssum = 0.;
-    // even/odd ordering
-    for (lll = 0; lll <= 1; lll++)
-    {
-      dum = lll;
-#ifdef _OPENMP
-#pragma omp parallel for private(im, ip, j, jm, jp, resid)
-#endif
-      for (i = i0p; i <= i1m; i++) // ibb=1 -> phi=0 b.c.
-      {
-        im = (i == i0) ? imbc : i - 1;
-        ip = (i == i1) ? ipbc : i + 1;
-        for (j = j0 + dum; j <= j1; j += 2)
+      im = ( i==i0 )? imbc : i-1;
+      ip = ( i==i1) ? ipbc : i+1;
+      for (j=j0;j<=j1;++j)
         {
-          jm = (j == j0) ? jmbc : j - 1;
-          jp = (j == j1) ? jpbc : j + 1;
-
-          resid = (uu1p[ip][j] + uu1p[im][j] + uu1p[i][jp] + uu1p[i][jm] - 4. * uu1p[i][j] - fffp[i][j]);
-          uu1p[i][j] += .25 * om_sor * resid;
-          epssum += fabs(resid);
+          jm = (j==j0) ? jmbc : j-1;
+          jp = (j==j1) ? jpbc : j+1;
+          
+          uu1p[i][j] = 0.; // initial value for iteration
+          if (isorcnt>0) uu1p[i][j] = uuu[i][j];
+          if (isorcnt>1) uu1p[i][j]+= 1.0*(uu0[i][j] - uuu[i][j]);
+          
+          fffp[i][j] = qqq[i][j];
+          // 2nd order 5pt correction to r.h.s.
+          // -> 4th order discretization of Laplacian (else only 2nd order)
+          fffp[i][j] += ( qqq[im][j] + qqq[ip][j] + qqq[i][jm] + qqq[i][jp]
+                            - 4.*qqq[i][j] )*(1./12.);          
+          fnorm += fabs(fffp[i][j]);
+          fffp[i][j] *= 1./hy2;
         }
-        dum = 1 - dum;
-      }
-#ifdef _OPENMP
-#pragma omp barrier
-#endif
-      om_sor = ((iter == 1) && (lll == 0)) ? 1. / (1. - 2. * rel2) : 1. / (1. - rel2 * om_sor);
     }
-    if (epssum < fcheck)
+
+  isorcnt ++;
+  fcheck = epsmax*fnorm;     
+  om_sor = 1.;     
+
+  double pavg = 0.;
+  for (i=0; i<=i1; i++) for (j=0; j<=j1; j++) pavg+=fffp[i][j];
+  for (i=0; i<=i1; i++) for (j=0; j<=j1; j++) fffp[i][j] -= pavg/double(ny*nx);
+   
+ 
+  // begin iteration     
+  for (iter=1; iter<=nit; ++iter)
     {
-      break;
+      epssum = 0.;     
+      // even/odd ordering
+
+#pragma omp parallel for private(j,im,jm,ip,jp,dum,resid) reduction(+:epssum)
+    for (i=i0+ibb; i<=i1-ibb; i++) { // ibb=1 -> phi=0 b.c.
+      dum = 1 - (i % 2);
+
+      im = (i==i0) ? i1 : i-1;
+      ip = (i==i1) ? i0 : i+1;
+     
+      for (j=j0+dum; j<=j1; j+=2)  {
+        jm = (j==j0) ? j1 : j-1;
+        jp = (j==j1) ? j0 : j+1;
+
+        resid = ( uu1p[ip][j] + uu1p[im][j] + uu1p[i][jp] + uu1p[i][jm]
+                  - 4.*uu1p[i][j]  - fffp[i][j] );
+        uu1p[i][j]+= .25*om_sor*resid;
+        epssum += fabs(resid);
+      }
     }
-  }
+    om_sor = (iter==1)? 1./(1.-2.*rel2) : 1./(1.-rel2*om_sor);
+
+#pragma omp parallel for private(j,im,jm,ip,jp,dum,resid) reduction(+:epssum)
+    for (i=i0+ibb; i<=i1-ibb; i++) { // ibb=1 -> phi=0 b.c.
+      dum = (i % 2);
+
+      im = (i==i0) ? i1 : i-1;
+      ip = (i==i1) ? i0 : i+1;
+ 
+      for (j=j0+dum; j<=j1; j+=2) {
+        jm = (j==j0) ? j1 : j-1;
+        jp = (j==j1) ? j0 : j+1;
+
+        resid = ( uu1p[ip][j] + uu1p[im][j] + uu1p[i][jp] + uu1p[i][jm]
+                  - 4.*uu1p[i][j]  - fffp[i][j] );
+        uu1p[i][j]+= .25*om_sor*resid;
+        epssum += fabs(resid);
+      }
+    }
+    om_sor = 1./(1.-rel2*om_sor);
+    if ((epssum < fcheck)||(epssum!=epssum)) { break;}
+    }
   // end iteration
 
-#ifdef _OPENMP
-#pragma omp parallel for
-#endif
-  for (i = i0; i <= i1; ++i)
-    for (j = j0; j <= j1; ++j)
-    {
-      uu0[i][j] = uuu[i][j];
-      uuu[i][j] = uu1p[i][j];
-    }
-#ifdef _OPENMP
-#pragma omp barrier
-#endif
-}
-
+#pragma omp parallel for private(j)
+  for (i=i0;i<=i1;++i) for (j=j0;j<=j1;++j) {uu0[i][j]=uuu[i][j]; uuu[i][j]=uu1p[i][j];}
+} 
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
